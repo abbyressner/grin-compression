@@ -6,16 +6,18 @@ import java.io.*;
  * A BitOutputStream allows bit-by-bit writing to a file.
  */
 public class BitOutputStream {
+
     private PrintStream output;
     private int digits;     // a buffer used to build up next set of digits
     private int cursor;     // our current position in the buffer.
     private boolean debug;  // set to true to write ASCII 0s and 1s rather than
-                            // bits
+    // bits
 
     private static final int BYTE_SIZE = 8; // digits per byte
 
     /**
      * Constructs a new BitOutputStream attached to the given file.
+     *
      * @param file the file to write to
      * @param debug true iff you want to output the bits as ASCII 0s and 1s
      * @throws FileNotFoundException if the file is not found
@@ -29,6 +31,7 @@ public class BitOutputStream {
 
     /**
      * Constructs a new BitOutputStream attached to the given file.
+     *
      * @param file the file to write to
      * @throws FileNotFoundException if the file is not found
      */
@@ -38,6 +41,7 @@ public class BitOutputStream {
 
     /**
      * Writes the given bit to the stream.
+     *
      * @param bit the bit to write (0 or 1)
      */
     public void writeBit(int bit) {
@@ -56,11 +60,12 @@ public class BitOutputStream {
 
     /**
      * Writes the lower n bits to the stream in big-endian style.
+     *
      * @param bits the bits to write as an integer
      * @param n the number of bits to write from the integer
      */
     public void writeBits(int bits, int n) {
-        for (int i = n-1; i >= 0; i--) {
+        for (int i = n - 1; i >= 0; i--) {
             writeBit((bits >>> i) % 2);
         }
     }
@@ -79,7 +84,9 @@ public class BitOutputStream {
         cursor = BYTE_SIZE - 1;
     }
 
-    /** Closes the stream, flushing any remaining bits to the file */
+    /**
+     * Closes the stream, flushing any remaining bits to the file
+     */
     public void close() {
         if (cursor >= 0) {
             flush();
