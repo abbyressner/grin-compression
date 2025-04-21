@@ -1,13 +1,13 @@
-# Project: Grin Compression
+# Project 8: Grin Compression
 
-Authors: (_TODO: fill in names here!_)
+Authors: Abby Ressner
 
 ## Resources
 
-*   (_TODO: fill in resources here!_)
-*   ...
-*   ...
+* Java 21.0.6
+* Apache Maven 3.9.9
+* Visual Studio Code
 
 ## Revision Log
 
-*   (_TODO: fill in your changes to your project here!_)
+* (_TODO: fill in your changes to your project here!_)
