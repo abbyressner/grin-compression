@@ -25,6 +25,8 @@ public class Grin {
         } else {
             throw new IllegalArgumentException();
         }
+        in.close();
+        out.close();
     }
 
     /**
@@ -57,8 +59,16 @@ public class Grin {
      * @param infile the file to encode.
      * @param outfile the file to write the output to.
      */
-    public static void encode(String infile, String outfile) {
-        // TODO: fill me in!
+    public static void encode(String infile, String outfile) throws IOException {
+        Map<Short, Integer> freqs = createFrequencyMap(infile);
+        BitInputStream in = new BitInputStream(infile);
+        BitOutputStream out = new BitOutputStream(outfile);
+        HuffmanTree ht = new HuffmanTree(freqs);
+        out.writeBits(0x736, 32);
+        ht.serialize(out);
+        ht.encode(in, out);
+        in.close();
+        out.close();
     }
 
     /**
