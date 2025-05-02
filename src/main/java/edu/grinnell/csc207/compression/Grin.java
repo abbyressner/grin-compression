@@ -1,5 +1,7 @@
 package edu.grinnell.csc207.compression;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,8 +16,15 @@ public class Grin {
      * @param infile the file to decode
      * @param outfile the file to ouptut to
      */
-    public static void decode(String infile, String outfile) {
-        // TODO: fill me in!
+    public static void decode(String infile, String outfile) throws IOException{
+        BitInputStream in = new BitInputStream(infile);
+        BitOutputStream out = new BitOutputStream(outfile);
+        if (in.readBits(32) == 0x736) {
+            HuffmanTree ht = new HuffmanTree(in);
+            ht.decode(in, out);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -26,9 +35,19 @@ public class Grin {
      * @param file the file to read
      * @return a freqency map for the given file
      */
-    public static Map<Short, Integer> createFrequencyMap(String file) {
-        // TODO: fill me in!
-        return null;
+    public static Map<Short, Integer> createFrequencyMap(String file) throws IOException {
+        BitInputStream in = new BitInputStream(file);
+        Map<Short, Integer> freqs = new HashMap<>();
+        while (in.hasBits()) {
+            short value = (short) in.readBits(8);
+            if (freqs.containsKey(value)) {
+                freqs.put(value, freqs.get(value) + 1);
+            } else {
+                freqs.put(value, 1);
+            }
+        }
+        in.close();
+        return freqs;
     }
 
     /**
@@ -47,8 +66,22 @@ public class Grin {
      *
      * @param args the command-line arguments.
      */
-    public static void main(String[] args) {
-        // TODO: fill me in!
-        System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");
+    public static void main(String[] args) throws IOException {
+
+        if (args.length != 3 || (!args[0].equals("encode") && !args[0].equals("decode"))) {
+            System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");
+            System.exit(0);
+        } 
+
+        String infile = args[1];
+        String outfile = args[2];
+
+        if (args[0].equals("encode")) {
+            encode(infile, outfile);
+        }
+
+        if (args[0].equals("decode")) {
+            decode(infile, outfile);
+        }
     }
 }
