@@ -1,6 +1,9 @@
 package edu.grinnell.csc207.compression;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.TreeMap;
 
 /**
  * A HuffmanTree derives a space-efficient coding of a collection of byte
@@ -25,6 +28,8 @@ public class HuffmanTree {
         public Node(short value, int freq) {
             this.value = value;
             this.freq = freq;
+            this.left = null;
+            this.right = null;
         }
 
         public Node(int freq, Node left, Node right) {
@@ -36,13 +41,41 @@ public class HuffmanTree {
 
     private Node root;
 
+    private Map<Short, String> codes;
+
     /**
      * Constructs a new HuffmanTree from a frequency map.
      *
      * @param freqs a map from 9-bit values to frequencies.
      */
     public HuffmanTree(Map<Short, Integer> freqs) {
+        freqs.put((short) 256, 1);
+        PriorityQueue<Node> queue = new PriorityQueue<>();
+        TreeMap<Short, Integer> sorted = new TreeMap<>(freqs);
+        for (Short value : sorted.keySet()) {
+            int freq = sorted.get(value);
+            Node node = new Node(value, freq);
+            queue.add(node);
+        }
 
+        while (queue.size() > 1) {
+            Node left = queue.poll();
+            Node right = queue.poll();
+            Node parent = new Node(left.freq + right.freq, left, right);
+            queue.add(parent);
+        }
+        root = queue.poll();
+        codes = new HashMap<>();
+        generateCodeMap(root, "");
+    }
+
+    private void generateCodeMap(Node node, String code) {
+        if (node.left == null && node.right == null) {
+            codes.put(node.value, code);
+        } else {
+            generateCodeMap(node.left, code + "0");
+            generateCodeMap(node.right, code + "1");
+        }
     }
 
     /**
@@ -58,8 +91,7 @@ public class HuffmanTree {
         int bit = in.readBit();
         if (bit == 0) {
             short value = (short) in.readBits(9);
-            int freq = in.readBits(32);
-            return new Node(value, freq);
+            return new Node(value, 0);
         } else {
             Node left = readTree(in);
             Node right = readTree(in);
@@ -78,7 +110,7 @@ public class HuffmanTree {
     }
 
     private void writeTree(Node node, BitOutputStream out) {
-        if (isLeaf(node)) {
+        if (node.left == null && node.right == null) {
             out.writeBit(0);
             out.writeBits(node.value, 9);
         } else {
@@ -97,7 +129,8 @@ public class HuffmanTree {
      * @param out the file to write the compressed output to.
      */
     public void encode(BitInputStream in, BitOutputStream out) {
-
+        codes = new HashMap<>();
+        generateCodeMap(root, "");
     }
 
     /**
@@ -118,18 +151,13 @@ public class HuffmanTree {
             } else {
                 cur = cur.right;
             }
-            if (isLeaf(cur)) {
+            if (cur.left == null && cur.right == null) {
+                if (cur.value == (short) 256) {
+                    break;
+                }
                 out.writeBits(cur.value, 8);
                 cur = root;
             }
         }
-    }
-
-    private boolean isLeaf(Node node) {
-        return node.left == null && node.right == null;
-    }
-
-    private int compare(Node n1, Node n2) {
-        return Integer.compare(n1.freq, n2.freq);
     }
 }
