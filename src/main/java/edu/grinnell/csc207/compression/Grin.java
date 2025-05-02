@@ -16,7 +16,7 @@ public class Grin {
      * @param infile the file to decode
      * @param outfile the file to ouptut to
      */
-    public static void decode(String infile, String outfile) throws IOException{
+    public static void decode(String infile, String outfile) throws IOException {
         BitInputStream in = new BitInputStream(infile);
         BitOutputStream out = new BitOutputStream(outfile);
         if (in.readBits(32) == 0x736) {
