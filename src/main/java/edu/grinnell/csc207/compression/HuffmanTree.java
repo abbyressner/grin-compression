@@ -18,8 +18,11 @@ import java.util.TreeMap;
  */
 public class HuffmanTree {
 
-    private static class Node {
-
+    private static class Node implements Comparable<Node> {
+        @Override
+        public int compareTo(Node other) {
+            return Integer.compare(this.freq, other.freq);
+        }
         private short value;
         private int freq;
         private Node left;
@@ -33,6 +36,7 @@ public class HuffmanTree {
         }
 
         public Node(int freq, Node left, Node right) {
+            this.value = -1;
             this.freq = freq;
             this.left = left;
             this.right = right;
@@ -131,6 +135,17 @@ public class HuffmanTree {
     public void encode(BitInputStream in, BitOutputStream out) {
         codes = new HashMap<>();
         generateCodeMap(root, "");
+        int bits = 0;
+        while ((bits = in.readBits(8)) != -1) {
+            String code = codes.get((short) bits);
+            for (int i = 0; i < code.length(); i++) {
+                out.writeBit(code.charAt(i) - '0');
+            }
+        }
+        String code = codes.get((short) 256);
+        for (int i = 0; i < code.length(); i++) {
+            out.writeBit(code.charAt(i) - '0');
+        }
     }
 
     /**

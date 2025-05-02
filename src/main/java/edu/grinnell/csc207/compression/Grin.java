@@ -77,7 +77,6 @@ public class Grin {
      * @param args the command-line arguments.
      */
     public static void main(String[] args) throws IOException {
-
         if (args.length != 3 || (!args[0].equals("encode") && !args[0].equals("decode"))) {
             System.out.println("Usage: java Grin <encode|decode> <infile> <outfile>");
             System.exit(0);
