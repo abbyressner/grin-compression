@@ -15,13 +15,34 @@ import java.util.Map;
  */
 public class HuffmanTree {
 
+    private static class Node {
+
+        private short value;
+        private int freq;
+        private Node left;
+        private Node right;
+
+        public Node(short value, int freq) {
+            this.value = value;
+            this.freq = freq;
+        }
+
+        public Node(int freq, Node left, Node right) {
+            this.freq = freq;
+            this.left = left;
+            this.right = right;
+        }
+    }
+
+    private Node root;
+
     /**
      * Constructs a new HuffmanTree from a frequency map.
      *
      * @param freqs a map from 9-bit values to frequencies.
      */
     public HuffmanTree(Map<Short, Integer> freqs) {
-        // TODO: fill me in!
+
     }
 
     /**
@@ -30,7 +51,20 @@ public class HuffmanTree {
      * @param in the input file (as a BitInputStream)
      */
     public HuffmanTree(BitInputStream in) {
-        // TODO: fill me in!
+        root = readTree(in);
+    }
+
+    private Node readTree(BitInputStream in) {
+        int bit = in.readBit();
+        if (bit == 0) {
+            short value = (short) in.readBits(9);
+            int freq = in.readBits(32);
+            return new Node(value, freq);
+        } else {
+            Node left = readTree(in);
+            Node right = readTree(in);
+            return new Node(left.freq + right.freq, left, right);
+        }
     }
 
     /**
@@ -40,7 +74,18 @@ public class HuffmanTree {
      * @param out the output file as a BitOutputStream
      */
     public void serialize(BitOutputStream out) {
-        // TODO: fill me in!
+        writeTree(root, out);
+    }
+
+    private void writeTree(Node node, BitOutputStream out) {
+        if (isLeaf(node)) {
+            out.writeBit(0);
+            out.writeBits(node.value, 9);
+        } else {
+            out.writeBit(1);
+            writeTree(node.left, out);
+            writeTree(node.right, out);
+        }
     }
 
     /**
@@ -52,7 +97,7 @@ public class HuffmanTree {
      * @param out the file to write the compressed output to.
      */
     public void encode(BitInputStream in, BitOutputStream out) {
-        // TODO: fill me in!
+
     }
 
     /**
@@ -65,6 +110,26 @@ public class HuffmanTree {
      * @param out the file to write the decompressed output to.
      */
     public void decode(BitInputStream in, BitOutputStream out) {
-        // TODO: fill me in!
+        Node cur = root;
+        while (in.hasBits()) {
+            int bit = in.readBit();
+            if (bit == 0) {
+                cur = cur.left;
+            } else {
+                cur = cur.right;
+            }
+            if (isLeaf(cur)) {
+                out.writeBits(cur.value, 8);
+                cur = root;
+            }
+        }
+    }
+
+    private boolean isLeaf(Node node) {
+        return node.left == null && node.right == null;
+    }
+
+    private int compare(Node n1, Node n2) {
+        return Integer.compare(n1.freq, n2.freq);
     }
 }
